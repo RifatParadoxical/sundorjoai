@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<%- include('partials/head') %>
+
+    <body class="bg-background text-foreground font-sans antialiased overflow-x-hidden">
+        <!-- Hero Gradient Background -->
+        <div class="fixed inset-0 pointer-events-none hero-gradient z-0"></div>
+
+        <%- include('partials/nav') %>
+
+            <main class="relative z-10 pt-32">
+                <%- include('partials/hero') %>
+                    <%- include('partials/tech') %>
+                        <%- include('partials/features') %>
+                            <%- include('partials/levels') %>
+                                <%- include('partials/roadmap') %>
+                                    <%- include('partials/pricing') %>
+                                        <%- include('partials/business_stats') %>
+                                            <%- include('partials/comparison') %>
+                                                <%- include('partials/stats') %>
+                                                    <%- include('partials/cta') %>
+            </main>
+
+            <%- include('partials/footer') %>
+    </body>
+
+</html>

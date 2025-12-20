@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>404 - Page Not Found | Sundorjo.ai</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@600;700&display=swap"
+        rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        background: "hsl(240 10% 3.9%)",
+                        foreground: "hsl(0 0% 98%)",
+                        pink: {
+                            accent: "hsl(330 70% 65%)",
+                            glow: "hsla(330, 70%, 65%, 0.15)",
+                        },
+                        secondary: {
+                            DEFAULT: "hsl(240 3.7% 15.9%)",
+                            foreground: "hsl(0 0% 98%)",
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        display: ['Outfit', 'sans-serif'],
+                    },
+                    animation: {
+                        'float': 'float 6s ease-in-out infinite',
+                        'glow-pulse': 'glowPulse 3s ease-in-out infinite',
+                    },
+                    keyframes: {
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0)' },
+                            '50%': { transform: 'translateY(-20px)' },
+                        },
+                        glowPulse: {
+                            '0%, 100%': { opacity: '0.4', filter: 'blur(20px)' },
+                            '50%': { opacity: '0.7', filter: 'blur(40px)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        .glass {
+            background: rgba(20, 20, 23, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .hero-gradient {
+            background: radial-gradient(circle at 50% 50%, rgba(219, 39, 119, 0.1) 0%, rgba(255, 255, 255, 0) 70%);
+        }
+    </style>
+</head>
+
+<body class="bg-background text-foreground font-sans antialiased overflow-hidden selection:bg-pink-accent/30">
+
+    <div class="fixed inset-0 pointer-events-none hero-gradient z-0"></div>
+    <div
+        class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-pink-accent/10 rounded-full blur-[100px] animate-glow-pulse z-0">
+    </div>
+
+    <main class="relative z-10 min-h-screen flex flex-col items-center justify-center px-6 text-center">
+        <div class="animate-float mb-8">
+            <div
+                class="w-24 h-24 rounded-3xl bg-pink-accent/10 flex items-center justify-center mx-auto border border-pink-accent/20">
+                <i data-lucide="search-slash" class="text-pink-accent w-12 h-12"></i>
+            </div>
+        </div>
+
+        <h1
+            class="font-display text-[150px] md:text-[200px] font-bold leading-none tracking-tighter bg-gradient-to-b from-white to-pink-accent/50 bg-clip-text text-transparent opacity-80">
+            404
+        </h1>
+
+        <p class="font-display text-2xl md:text-3xl font-semibold mb-4">Lost in the skin layers?</p>
+        <p class="text-zinc-400 max-w-md mx-auto mb-12 text-lg">
+            This page doesn't exist. Maybe it's hidden under a deep exfoliation treatment or still in development.
+        </p>
+
+        <div class="flex flex-col md:flex-row items-center gap-4">
+            <a href="/"
+                class="w-full md:w-auto px-8 py-4 rounded-full bg-secondary text-secondary-foreground font-bold hover:bg-zinc-800 transition-all border border-zinc-800">
+                Back to Home
+            </a>
+            <button id="go-premium"
+                class="w-full md:w-auto px-10 py-4 rounded-full bg-pink-accent text-white font-bold hover:scale-105 transition-transform shadow-2xl shadow-pink-500/30">
+                Go Premium ✨
+            </button>
+        </div>
+    </main>
+
+    <div id="coming-soon-modal"
+        class="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center px-6 opacity-0 pointer-events-none transition-opacity duration-300">
+        <div class="glass p-12 rounded-[2.5rem] max-w-md w-full text-center relative overflow-hidden">
+            <div
+                class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-pink-accent to-transparent">
+            </div>
+            <div class="w-20 h-20 rounded-3xl bg-pink-accent/10 flex items-center justify-center mx-auto mb-6">
+                <i data-lucide="sparkles" class="text-pink-accent w-10 h-10 animate-pulse"></i>
+            </div>
+            <h3 class="font-display text-3xl font-bold mb-4">Coming Soon!</h3>
+            <p class="text-zinc-400 mb-8">Our premium intelligence suite is launching in just 40 days (January 29,
+                2026). Stay tuned!</p>
+            <button id="close-modal"
+                class="w-full py-4 rounded-xl bg-pink-accent text-white font-bold hover:scale-[1.02] transition-transform shadow-lg shadow-pink-500/20">
+                Got it!
+            </button>
+        </div>
+    </div>
+
+    <script>
+        lucide.createIcons();
+
+        const modal = document.getElementById('coming-soon-modal');
+        const premiumBtn = document.getElementById('go-premium');
+        const closeBtn = document.getElementById('close-modal');
+
+        if (premiumBtn) {
+            premiumBtn.addEventListener('click', () => {
+                modal.style.opacity = '1';
+                modal.style.pointerEvents = 'auto';
+            });
+        }
+
+        if (closeBtn) {
+            closeBtn.addEventListener('click', () => {
+                modal.style.opacity = '0';
+                modal.style.pointerEvents = 'none';
+            });
+        }
+
+        window.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                modal.style.opacity = '0';
+                modal.style.pointerEvents = 'none';
+            }
+        });
+    </script>
+</body>
+
+</html>

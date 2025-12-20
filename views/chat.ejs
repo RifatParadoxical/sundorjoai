@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<%- include('partials/head') %>
+
+    <body class="bg-background text-foreground font-sans antialiased overflow-hidden selection:bg-pink-accent/30">
+
+        <!-- Subtle Background Elements -->
+        <div class="fixed inset-0 pointer-events-none z-0">
+            <div class="absolute top-0 right-0 w-[500px] h-[500px] bg-pink-accent/5 blur-[100px] rounded-full"></div>
+            <div class="absolute bottom-0 left-0 w-[500px] h-[500px] bg-blue-500/5 blur-[100px] rounded-full"></div>
+        </div>
+
+        <!-- Navigation -->
+        <%- include('partials/nav') %>
+
+            <!-- Main Chat Layout -->
+            <div class="relative z-10 flex pt-16 h-screen justify-center">
+                <%- include('partials/chat_interface') %>
+            </div>
+
+            <script>
+                lucide.createIcons();
+            </script>
+    </body>
+
+</html>

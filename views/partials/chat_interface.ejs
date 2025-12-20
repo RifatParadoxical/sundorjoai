@@ -1,0 +1,201 @@
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<div class="flex-1 flex flex-col h-[calc(100vh-64px)] pt-16 relative w-full max-w-5xl mx-auto">
+
+    <!-- Messages Area -->
+    <div class="flex-1 overflow-y-auto p-4 md:p-8 space-y-8 scroll-smooth" id="chat-messages">
+        <!-- Intro Message -->
+        <div class="max-w-3xl mx-auto text-center mb-12 animate-fade-in">
+            <div
+                class="w-16 h-16 rounded-2xl bg-pink-accent/10 flex items-center justify-center mx-auto mb-4 border border-pink-accent/20">
+                <i data-lucide="sparkles" class="text-pink-accent w-8 h-8"></i>
+            </div>
+            <h2 class="text-2xl font-display font-bold mb-2">How is your skin feeling today?</h2>
+            <p class="text-zinc-400">Upload a selfie or ask about a product to get started.</p>
+        </div>
+
+        <!-- AI Message -->
+        <div class="max-w-3xl mx-auto flex gap-4 animate-slide-up">
+            <div class="w-8 h-8 rounded-lg bg-pink-accent flex items-center justify-center shrink-0 mt-1">
+                <i data-lucide="bot" class="text-white w-5 h-5"></i>
+            </div>
+            <div class="space-y-2">
+                <div
+                    class="glass px-6 py-4 rounded-2xl rounded-tl-none border border-white/10 text-zinc-200 leading-relaxed">
+                    <p>Hello! I'm your skin intelligence companion. I can analyze visual patterns or check ingredient
+                        safety for you. What's on your mind?</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Input Area -->
+    <div class="p-4 md:p-6 pb-6 bg-gradient-to-t from-background via-background to-transparent z-10">
+        <div
+            class="max-w-3xl mx-auto relative glass rounded-2xl border border-white/10 hover:border-pink-accent/30 transition-colors focus-within:border-pink-accent/50 focus-within:ring-1 focus-within:ring-pink-accent/50">
+            <form id="chat-form" class="flex items-end gap-2 p-2">
+                <input type="file" id="file-input" class="hidden" accept="image/*">
+                <div class="flex shrink-0">
+                    <button type="button" id="upload-btn"
+                        class="p-3 text-zinc-400 hover:text-pink-accent hover:bg-white/5 rounded-xl transition-all relative"
+                        title="Upload Image">
+                        <i data-lucide="image-plus" class="w-5 h-5"></i>
+                        <span id="file-indicator"
+                            class="absolute top-2 right-2 w-2 h-2 bg-pink-accent rounded-full hidden"></span>
+                    </button>
+                </div>
+
+                <textarea id="message-input" rows="1" placeholder="Ask anything about your skin..."
+                    class="w-full bg-transparent border-0 focus:ring-0 text-white placeholder-zinc-500 resize-none py-3 max-h-32 text-sm"
+                    oninput="this.style.height = ''; this.style.height = this.scrollHeight + 'px'"></textarea>
+
+                <div class="flex shrink-0">
+                    <button type="submit"
+                        class="p-3 bg-pink-accent text-white rounded-xl hover:opacity-90 transition-all shadow-lg shadow-pink-500/20 disabled:opacity-50 disabled:cursor-not-allowed">
+                        <i data-lucide="send-horizontal" class="w-5 h-5"></i>
+                    </button>
+                </div>
+            </form>
+        </div>
+        <p class="text-center text-[10px] text-zinc-600 mt-3">
+            AI can make mistakes. For medical advice, consult a dermatologist.
+        </p>
+    </div>
+</div>
+
+<script>
+    const chatForm = document.getElementById('chat-form');
+    const messageInput = document.getElementById('message-input');
+    const fileInput = document.getElementById('file-input');
+    const uploadBtn = document.getElementById('upload-btn');
+    const fileIndicator = document.getElementById('file-indicator');
+    const chatMessages = document.getElementById('chat-messages');
+    const submitBtn = chatForm.querySelector('button[type="submit"]');
+
+    // Handle File Upload Button
+    uploadBtn.addEventListener('click', () => fileInput.click());
+
+    fileInput.addEventListener('change', () => {
+        if (fileInput.files.length > 0) {
+            fileIndicator.classList.remove('hidden');
+            uploadBtn.classList.add('text-pink-accent');
+        } else {
+            fileIndicator.classList.add('hidden');
+            uploadBtn.classList.remove('text-pink-accent');
+        }
+    });
+
+    // Handle Form Submit
+    chatForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const text = messageInput.value.trim();
+        const file = fileInput.files[0];
+
+        if (!text && !file) return;
+
+        // Reset Input UI
+        messageInput.value = '';
+        messageInput.style.height = 'auto';
+        fileInput.value = '';
+        fileIndicator.classList.add('hidden');
+        uploadBtn.classList.remove('text-pink-accent');
+        submitBtn.disabled = true;
+
+        // Append User Message
+        appendMessage('user', text, file);
+
+        // Append Loading Indicator
+        const loadingId = appendLoading();
+
+        try {
+            const formData = new FormData();
+            formData.append('text', text);
+            if (file) {
+                formData.append('image', file);
+            }
+
+            const response = await fetch('/api/chat', {
+                method: 'POST',
+                body: formData
+            });
+
+            const data = await response.json();
+
+            // Remove Loading
+            removeLoading(loadingId);
+
+            if (data.success) {
+                appendMessage('ai', data.result);
+            } else {
+                appendMessage('ai', 'Sorry, something went wrong. Please try again.');
+            }
+
+        } catch (error) {
+            removeLoading(loadingId);
+            appendMessage('ai', 'Error connecting to the server.');
+            console.error(error);
+        } finally {
+            submitBtn.disabled = false;
+        }
+    });
+
+    function appendMessage(role, text, file = null) {
+        const div = document.createElement('div');
+        div.className = `max-w-3xl mx-auto flex gap-4 animate-slide-up ${role === 'user' ? 'flex-row-reverse' : ''}`;
+
+        let contentHtml = '';
+
+        if (file) {
+            const url = URL.createObjectURL(file);
+            contentHtml += `<img src="${url}" class="max-w-[200px] rounded-xl mb-2 border border-white/10">`;
+        }
+
+        if (text) {
+            const htmlContent = marked.parse(text);
+            contentHtml += `<div class="prose prose-invert prose-sm max-w-none prose-p:leading-relaxed prose-headings:font-display prose-headings:font-bold prose-strong:text-pink-accent prose-li:text-zinc-300 pointer-events-auto select-text">${htmlContent}</div>`;
+        }
+
+        div.innerHTML = `
+            <div class="w-8 h-8 rounded-lg ${role === 'user' ? 'bg-zinc-800' : 'bg-pink-accent'} flex items-center justify-center shrink-0 mt-1">
+                 <i data-lucide="${role === 'user' ? 'user' : 'bot'}" class="${role === 'user' ? 'text-zinc-400' : 'text-white'} w-5 h-5"></i>
+            </div>
+            <div class="glass px-6 py-4 rounded-2xl ${role === 'user' ? 'rounded-tr-none border-pink-accent/20 bg-pink-accent/5 text-white' : 'rounded-tl-none border-white/10 text-zinc-200'} leading-relaxed">
+                ${contentHtml || '<p>Sent an image.</p>'}
+            </div>
+        `;
+
+        chatMessages.appendChild(div);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+        lucide.createIcons();
+    }
+
+    function appendLoading() {
+        const id = 'loading-' + Date.now();
+        const div = document.createElement('div');
+        div.id = id;
+        div.className = "max-w-3xl mx-auto flex gap-4 animate-slide-up";
+        div.innerHTML = `
+             <div class="w-8 h-8 rounded-lg bg-pink-accent flex items-center justify-center shrink-0 mt-1">
+                 <i data-lucide="bot" class="text-white w-5 h-5"></i>
+            </div>
+            <div class="space-y-2">
+                <div class="glass px-6 py-4 rounded-2xl rounded-tl-none border border-white/10">
+                     <div class="flex gap-1.5 h-full items-center">
+                        <span class="w-1.5 h-1.5 bg-zinc-500 rounded-full animate-bounce"></span>
+                        <span class="w-1.5 h-1.5 bg-zinc-500 rounded-full animate-bounce" style="animation-delay: 0.1s"></span>
+                        <span class="w-1.5 h-1.5 bg-zinc-500 rounded-full animate-bounce" style="animation-delay: 0.2s"></span>
+                    </div>
+                </div>
+            </div>
+        `;
+        chatMessages.appendChild(div);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+        lucide.createIcons();
+        return id;
+    }
+
+    function removeLoading(id) {
+        const el = document.getElementById(id);
+        if (el) el.remove();
+    }
+</script>
