@@ -1,9 +1,11 @@
+require('dotenv').config();
 const express = require('express');
 const app = express();
 const path = require('path');
 const upload = require('./middleware/upload');
 const { uploadToTmpFiles } = require('./utils/api');
 const { generateAIResponse } = require('./utils/ai');
+const { generateGrokResponse } = require('./utils/grok');
 
 
 
@@ -33,9 +35,19 @@ app.post('/api/chat', upload.single('image'), async (req, res) => {
 
 
 
-        const imageUrl = await uploadToTmpFiles(imageFile);
+        let responseData;
 
-        const responseData = await generateAIResponse(userText, imageUrl);
+        if (imageFile) {
+
+            const imageUrl = await uploadToTmpFiles(imageFile);
+
+
+            responseData = await generateAIResponse(userText, imageUrl);
+        } else {
+
+            responseData = await generateGrokResponse(userText);
+        }
+
         res.json(responseData);
 
     } catch (error) {
