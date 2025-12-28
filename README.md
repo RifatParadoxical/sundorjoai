@@ -9,7 +9,7 @@ Sundorjo AI is an AI-powered skin intelligence assistant that provides personali
 - Node.js 18+ 
 - MongoDB
 - Cloudinary account (for image uploads)
-- API keys for AI services (SyntexCore, OpenRouter, etc.)
+- API keys for AI services (SyntexCore, OpenRouter, gemini etc.)
 
 ### Installation
 
