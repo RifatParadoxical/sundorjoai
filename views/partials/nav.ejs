@@ -9,15 +9,47 @@
         </div>
 
         <div class="hidden md:flex items-center gap-8 text-sm font-medium text-muted-foreground">
-            <a href="#features" class="hover:text-foreground transition-colors">Features</a>
-            <a href="#levels" class="hover:text-foreground transition-colors">Levels of Care</a>
-            <a href="#pricing" class="hover:text-foreground transition-colors">Pricing</a>
-            <a href="#privacy" class="hover:text-foreground transition-colors">Privacy</a>
+            <a href="/#features" class="hover:text-foreground transition-colors">Features</a>
+            <a href="/#levels" class="hover:text-foreground transition-colors">Levels of Care</a>
+            <a href="/#pricing" class="hover:text-foreground transition-colors">Pricing</a>
+            <a href="/#privacy" class="hover:text-foreground transition-colors">Privacy</a>
         </div>
 
-        <button
-            class="bg-pink-accent text-white px-4 py-2 rounded-md text-sm font-semibold hover:opacity-90 transition-opacity shadow-[0_0_10px_rgba(219,39,119,0.3)]">
-            Try Free
-        </button>
+        <% if (typeof user !== 'undefined' && user) { %>
+            <div class="flex items-center gap-4">
+                <span class="text-sm text-zinc-400 hidden md:block"><%= user.email %></span>
+                <a href="/chat" class="text-sm text-zinc-300 hover:text-foreground transition-colors">Chat</a>
+                <button id="logout-btn" class="bg-zinc-800 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-zinc-700 transition-colors">
+                    Logout
+                </button>
+            </div>
+        <% } else { %>
+            <div class="flex items-center gap-3">
+                <a href="/auth/signin" class="text-sm text-zinc-300 hover:text-foreground transition-colors">Sign In</a>
+                <a href="/auth/signup" class="bg-pink-accent text-white px-4 py-2 rounded-md text-sm font-semibold hover:opacity-90 transition-opacity shadow-[0_0_10px_rgba(219,39,119,0.3)]">
+                    Sign Up
+                </a>
+            </div>
+        <% } %>
     </div>
 </nav>
+
+<script>
+    // Logout functionality
+    document.getElementById('logout-btn')?.addEventListener('click', async () => {
+        try {
+            const response = await fetch('/auth/logout', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+            const data = await response.json();
+            if (data.success) {
+                window.location.href = '/';
+            }
+        } catch (error) {
+            console.error('Logout error:', error);
+        }
+    });
+</script>

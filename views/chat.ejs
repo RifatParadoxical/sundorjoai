@@ -2,25 +2,32 @@
 <html lang="en">
 <%- include('partials/head') %>
 
-    <body class="bg-background text-foreground font-sans antialiased overflow-hidden selection:bg-pink-accent/30">
+    <body class="bg-background text-foreground font-sans antialiased overflow-hidden selection:bg-pink-accent/10">
 
-        <!-- Subtle Background Elements -->
-        <div class="fixed inset-0 pointer-events-none z-0">
-            <div class="absolute top-0 right-0 w-[500px] h-[500px] bg-pink-accent/5 blur-[100px] rounded-full"></div>
-            <div class="absolute bottom-0 left-0 w-[500px] h-[500px] bg-blue-500/5 blur-[100px] rounded-full"></div>
+        <!-- Professional Background Elements -->
+        <div class="fixed inset-0 pointer-events-none z-0 overflow-hidden">
+            <!-- Static subtle background accents -->
+            <div class="absolute top-0 right-0 w-[800px] h-[800px] bg-zinc-800/3 blur-[150px] rounded-full"></div>
+            <div class="absolute bottom-0 left-0 w-[800px] h-[800px] bg-blue-950/5 blur-[150px] rounded-full"></div>
+            
+            <!-- Very subtle grid pattern overlay -->
+            <div class="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.01)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.01)_1px,transparent_1px)] bg-[size:50px_50px]"></div>
+            
+            <!-- Subtle gradient overlay -->
+            <div class="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-background/30"></div>
         </div>
 
         <!-- Navigation -->
-        <%- include('partials/nav') %>
+        <%- include('partials/nav', { user: typeof user !== 'undefined' ? user : null }) %>
 
-            <!-- Main Chat Layout -->
-            <div class="relative z-10 flex pt-16 h-screen justify-center">
-                <%- include('partials/chat_interface') %>
-            </div>
+        <!-- Main Chat Layout -->
+        <div class="relative z-10 flex pt-16 h-screen justify-center">
+            <%- include('partials/chat_interface', { chatId: typeof chatId !== 'undefined' ? chatId : null, messages: typeof messages !== 'undefined' ? messages : [] }) %>
+        </div>
 
-            <script>
-                lucide.createIcons();
-            </script>
+        <script>
+            lucide.createIcons();
+        </script>
     </body>
 
 </html>
