@@ -15,13 +15,26 @@ Sundorjo AI is an AI-powered skin intelligence assistant that provides personali
 
 1. Clone the repository:
 ```bash
-git clone <repository-url>
+git clone https://github.com/ScriptySphere/sundorjoai.git
 cd sundorjo
+
+# (if you are using vs code)
+code .
+# or (if using vs code insiders)
+code-insiders .
+# or (if using codium)
+codium .
+# or (if using kate code editor)
+kate .
+# or (if using notepad)
+notepad .
+# or (if using sublime text)
+subl .
 ```
 
 2. Install dependencies:
 ```bash
-npm install
+npm install 
 ```
 
 3. Create a `.env` file in the root directory with the following variables:
@@ -149,4 +162,4 @@ Feel free to submit issues and enhancement requests. Pull requests are welcome.
 
 ## License
 
-This project is licensed under the MIT License.ssss
+This project is licensed under the MIT License.
