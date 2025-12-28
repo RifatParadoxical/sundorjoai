@@ -1,64 +1,94 @@
+console.log('index.js has been reloaded');
+const chalk = require('chalk').default || require('chalk');
 require('dotenv').config();
 const express = require('express');
 const app = express();
 const path = require('path');
-const upload = require('./middleware/upload');
-const { uploadToTmpFiles } = require('./utils/api');
-const { generateAIResponse } = require('./utils/ai');
-const { generateGrokResponse } = require('./utils/grok');
+const connectDB = require('./config/database');
 
 
 
 
 
+const setupSecurity = require('./middleware/security');
+const setupSession = require('./middleware/session');
+const requestLogger = require('./middleware/logging');
+
+
+
+const indexRoutes = require('./routes/index');
+const authRoutes = require('./routes/auth');
+const chatRoutes = require('./routes/chat');
+
+
+
+connectDB().catch(err => {
+    console.error('Failed to initialize database connection:', err);
+});
+
+// Setup Security Middleware (Helmet, CSP, CORS, Rate Limit)
+setupSecurity(app);
+
+// Parse JSON and URL-encoded bodies
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+
+// Setup Session (and user locals)
+setupSession(app);
+
+// View engine setup
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
-
+// Static files
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.get('/', (req, res) => {
-    res.render('index');
-});
+// Request logging
+app.use(requestLogger);
 
+// Routes
+app.use('/', indexRoutes);
+app.use('/auth', authRoutes);
+app.use('/chat', chatRoutes); // /chat and /chat/:id
+// Note: chatRoutes also handles /api/chat/:id inside it if we mounted it at /chat? 
+// Wait, my chatRoutes logic handles `/` and `/:chatId`.
+// But it also defines `/api/:chatId/messages` and `/api/:chatId`.
+// If I mount it at `/chat`, then `/chat/api/...` works?
+// No, the original API was `/api/chat/:chatId`.
+// So I should probably mount the API routes separately or handle the prefixes correctly in `routes/chat.js`.
 
-app.get('/chat', (req, res) => {
-    res.render('chat');
-});
+// Let's re-examine routes/chat.js
+/*
+router.get('/', ...) -> /chat/
+router.get('/:chatId', ...) -> /chat/:chatId
+router.get('/api/:chatId/messages', ...) -> /chat/api/:chatId/messages (This is wrong if I want /api/chat/...)
+router.post('/api/:chatId', ...) -> /chat/api/:chatId
+*/
 
+// The original `index.js` had:
+// app.get('/chat', ...)
+// app.get('/chat/:chatId', ...)
+// app.get('/api/chat/:chatId/messages', ...)
+// app.post('/api/chat/:chatId', ...)
 
+// If I mount `chatRoutes` at `/chat`, then:
+// `router.get('/', ...)` becomes `/chat/` (Correct)
+// `router.get('/:chatId', ...)` becomes `/chat/:chatId` (Correct)
+// `router.get('/api/:chatId/messages', ...)` becomes `/chat/api/:chatId/messages` (WRONG, needs to be /api/chat/...)
 
-app.post('/api/chat', upload.single('image'), async (req, res) => {
-    try {
-        const userText = req.body.text || "Analyze this image";
-        const imageFile = req.file;
+// So I should probably define two routers or handle it differently.
+// OR, I mount it at `/` and prefix in the route definitions.
+// Let's mount `chatRoutes` at `/`.
+app.use('/', chatRoutes);
+// In chatRoutes:
+// `router.get('/chat', ...)`
+// `router.get('/chat/:chatId', ...)`
+// `router.get('/api/chat/:chatId/messages', ...)`
+// `router.post('/api/chat/:chatId', ...)`
 
-
-
-        let responseData;
-
-        if (imageFile) {
-
-            const imageUrl = await uploadToTmpFiles(imageFile);
-
-
-            responseData = await generateAIResponse(userText, imageUrl);
-        } else {
-
-            responseData = await generateGrokResponse(userText);
-        }
-
-        res.json(responseData);
-
-    } catch (error) {
-        console.error('API Error:', error.message);
-        res.status(500).json({ success: false, error: 'Failed to process request' });
-    }
-});
-
-
+// 404 handler
 app.use((req, res) => {
-    res.status(404).render('404');
+    res.status(404).render('404', { user: res.locals.user });
 });
 
 const PORT = process.env.PORT || 3000;

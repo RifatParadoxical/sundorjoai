@@ -6,7 +6,7 @@
         <!-- Hero Gradient Background -->
         <div class="fixed inset-0 pointer-events-none hero-gradient z-0"></div>
 
-        <%- include('partials/nav') %>
+        <%- include('partials/nav', { user: typeof user !== 'undefined' ? user : null }) %>
 
             <main class="relative z-10 pt-32">
                 <%- include('partials/hero') %>

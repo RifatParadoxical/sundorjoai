@@ -1,201 +1,684 @@
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-<div class="flex-1 flex flex-col h-[calc(100vh-64px)] pt-16 relative w-full max-w-5xl mx-auto">
+<style>
+    /* Professional Custom scrollbar */
+    #chat-messages::-webkit-scrollbar {
+        width: 6px;
+    }
 
+    #chat-messages::-webkit-scrollbar-track {
+        background: rgba(255, 255, 255, 0.02);
+        border-radius: 3px;
+    }
+
+    #chat-messages::-webkit-scrollbar-thumb {
+        background: rgba(148, 163, 184, 0.3);
+        border-radius: 3px;
+    }
+
+    #chat-messages::-webkit-scrollbar-thumb:hover {
+        background: rgba(148, 163, 184, 0.5);
+    }
+
+    /* Subtle Message animations */
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(8px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .message-enter {
+        animation: fadeIn 0.25s ease-out forwards;
+    }
+
+    /* Professional Typing indicator animation */
+    @keyframes typing {
+
+        0%,
+        100% {
+            opacity: 0.5;
+        }
+
+        50% {
+            opacity: 1;
+        }
+    }
+
+    .typing-dot {
+        animation: typing 1.4s infinite ease-in-out;
+        background: rgba(148, 163, 184, 0.6);
+    }
+
+    .typing-dot:nth-child(2) {
+        animation-delay: 0.2s;
+    }
+
+    .typing-dot:nth-child(3) {
+        animation-delay: 0.4s;
+    }
+
+    /* Smooth transitions */
+    .smooth-transition {
+        transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    /* Professional Message bubble */
+    .message-bubble {
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12),
+            0 1px 2px rgba(0, 0, 0, 0.08);
+        transition: box-shadow 0.2s ease;
+    }
+
+    .message-bubble:hover {
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.12),
+            0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Professional Input area */
+    .input-container {
+        backdrop-filter: blur(12px);
+        background: rgba(20, 20, 23, 0.85);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .input-container:focus-within {
+        border-color: rgba(219, 39, 119, 0.25);
+        box-shadow: 0 0 0 2px rgba(219, 39, 119, 0.08),
+            0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Professional Button hover effects */
+    .btn-hover {
+        transition: background-color 0.2s ease, opacity 0.2s ease;
+    }
+
+    .btn-hover:hover {
+        opacity: 0.9;
+    }
+
+    .btn-hover:active {
+        opacity: 0.8;
+    }
+
+    /* Professional Intro section */
+    .intro-icon {
+        background: rgba(219, 39, 119, 0.08);
+        border: 1px solid rgba(219, 39, 119, 0.15);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    /* File preview */
+    .file-preview {
+        backdrop-filter: blur(8px);
+        background: rgba(20, 20, 23, 0.95);
+        border: 1px solid rgba(148, 163, 184, 0.2);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 640px) {
+        .message-content {
+            max-width: 85%;
+        }
+
+        .input-container {
+            padding: 0.5rem;
+        }
+    }
+</style>
+
+<div class="flex-1 flex flex-col h-[calc(100vh-64px)] relative w-full max-w-5xl mx-auto">
     <!-- Messages Area -->
-    <div class="flex-1 overflow-y-auto p-4 md:p-8 space-y-8 scroll-smooth" id="chat-messages">
-        <!-- Intro Message -->
-        <div class="max-w-3xl mx-auto text-center mb-12 animate-fade-in">
-            <div
-                class="w-16 h-16 rounded-2xl bg-pink-accent/10 flex items-center justify-center mx-auto mb-4 border border-pink-accent/20">
-                <i data-lucide="sparkles" class="text-pink-accent w-8 h-8"></i>
+    <div class="flex-1 overflow-y-auto p-4 md:p-6 space-y-3 scroll-smooth" id="chat-messages">
+        <!-- Professional Intro Message -->
+        <div class="max-w-3xl mx-auto text-center mb-10 pt-6 px-4 animate-fade-in">
+            <div class="w-16 h-16 rounded-xl intro-icon flex items-center justify-center mx-auto mb-5">
+                <i data-lucide="sparkles" class="text-pink-accent w-7 h-7"></i>
             </div>
-            <h2 class="text-2xl font-display font-bold mb-2">How is your skin feeling today?</h2>
-            <p class="text-zinc-400">Upload a selfie or ask about a product to get started.</p>
+            <h2 class="text-2xl md:text-3xl font-display font-semibold mb-3 text-foreground">How is your skin feeling
+                today?</h2>
+            <p class="text-zinc-400 max-w-lg mx-auto text-sm md:text-base leading-relaxed">Upload a selfie or ask about
+                a product to get personalized skincare advice powered by AI.</p>
+            <div class="mt-5 flex items-center justify-center gap-3 text-xs text-zinc-500">
+                <div class="flex items-center gap-1.5">
+                    <i data-lucide="shield-check" class="w-3.5 h-3.5"></i>
+                    <span>Private & Secure</span>
+                </div>
+                <span class="text-zinc-600">•</span>
+                <div class="flex items-center gap-1.5">
+                    <i data-lucide="zap" class="w-3.5 h-3.5"></i>
+                    <span>Instant Analysis</span>
+                </div>
+            </div>
         </div>
 
-        <!-- AI Message -->
-        <div class="max-w-3xl mx-auto flex gap-4 animate-slide-up">
-            <div class="w-8 h-8 rounded-lg bg-pink-accent flex items-center justify-center shrink-0 mt-1">
-                <i data-lucide="bot" class="text-white w-5 h-5"></i>
+        <!-- Professional AI Message -->
+        <div class="max-w-3xl mx-auto flex gap-3 px-2 md:px-0 message-enter">
+            <div
+                class="w-8 h-8 rounded-lg bg-pink-accent/12 border border-pink-accent/20 flex items-center justify-center shrink-0">
+                <i data-lucide="bot" class="text-pink-accent w-4 h-4"></i>
             </div>
-            <div class="space-y-2">
+            <div class="message-content flex-1">
                 <div
-                    class="glass px-6 py-4 rounded-2xl rounded-tl-none border border-white/10 text-zinc-200 leading-relaxed">
-                    <p>Hello! I'm your skin intelligence companion. I can analyze visual patterns or check ingredient
-                        safety for you. What's on your mind?</p>
+                    class="glass px-4 py-3 rounded-lg rounded-tl-none border border-white/8 text-zinc-300 leading-relaxed message-bubble">
+                    <p class="text-sm md:text-base">Hello! I'm your skin intelligence companion. I can analyze visual
+                        patterns or check ingredient safety for you. What's on your mind?</p>
+                </div>
+                <div class="text-xs text-zinc-500 mt-1.5 ml-1 flex items-center gap-1">
+                    <span>Just now</span>
+                    <i data-lucide="check" class="w-3 h-3 text-blue-500"></i>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Input Area -->
-    <div class="p-4 md:p-6 pb-6 bg-gradient-to-t from-background via-background to-transparent z-10">
-        <div
-            class="max-w-3xl mx-auto relative glass rounded-2xl border border-white/10 hover:border-pink-accent/30 transition-colors focus-within:border-pink-accent/50 focus-within:ring-1 focus-within:ring-pink-accent/50">
-            <form id="chat-form" class="flex items-end gap-2 p-2">
-                <input type="file" id="file-input" class="hidden" accept="image/*">
-                <div class="flex shrink-0">
-                    <button type="button" id="upload-btn"
-                        class="p-3 text-zinc-400 hover:text-pink-accent hover:bg-white/5 rounded-xl transition-all relative"
-                        title="Upload Image">
-                        <i data-lucide="image-plus" class="w-5 h-5"></i>
-                        <span id="file-indicator"
-                            class="absolute top-2 right-2 w-2 h-2 bg-pink-accent rounded-full hidden"></span>
-                    </button>
-                </div>
+    <!-- Professional Input Area -->
+    <div
+        class="sticky bottom-0 left-0 right-0 bg-gradient-to-t from-background via-background/98 to-transparent z-10 pt-4 pb-2">
+        <div class="max-w-3xl mx-auto px-2 md:px-4 pb-4 md:pb-6">
+            <div class="relative input-container rounded-lg">
+                <form id="chat-form" class="flex items-end gap-2 p-2.5">
+                    <input type="file" id="file-input" class="hidden" accept="image/*">
+                    <div class="flex shrink-0">
+                        <button type="button" id="upload-btn"
+                            class="p-2.5 text-zinc-500 hover:text-pink-accent hover:bg-white/5 rounded-lg btn-hover relative group transition-colors"
+                            aria-label="Upload image">
+                            <i data-lucide="image-plus" class="w-4 h-4"></i>
+                            <div
+                                class="absolute -top-10 left-1/2 -translate-x-1/2 bg-zinc-900 text-white text-xs py-1.5 px-2.5 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-150 whitespace-nowrap pointer-events-none shadow-lg border border-white/10">
+                                Upload Image
+                                <div
+                                    class="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-zinc-900 rotate-45 border-r border-b border-white/10">
+                                </div>
+                            </div>
+                            <span id="file-indicator"
+                                class="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-pink-accent rounded-full border-2 border-background hidden"></span>
+                        </button>
+                    </div>
 
-                <textarea id="message-input" rows="1" placeholder="Ask anything about your skin..."
-                    class="w-full bg-transparent border-0 focus:ring-0 text-white placeholder-zinc-500 resize-none py-3 max-h-32 text-sm"
-                    oninput="this.style.height = ''; this.style.height = this.scrollHeight + 'px'"></textarea>
+                    <div class="flex-1 relative">
+                        <div id="file-preview"
+                            class="absolute -top-10 left-0 right-0 file-preview rounded-lg p-2.5 flex items-center justify-between text-xs text-zinc-300 hidden animate-fade-in">
+                            <div class="flex items-center gap-2 truncate max-w-[80%]">
+                                <div
+                                    class="w-7 h-7 rounded-md bg-pink-accent/10 border border-pink-accent/20 flex items-center justify-center flex-shrink-0">
+                                    <i data-lucide="image" class="w-3.5 h-3.5 text-pink-accent"></i>
+                                </div>
+                                <span id="file-name" class="truncate text-sm"></span>
+                            </div>
+                            <button type="button" id="remove-file"
+                                class="text-zinc-400 hover:text-white hover:bg-white/5 p-1 rounded-md transition-colors">
+                                <i data-lucide="x" class="w-3.5 h-3.5"></i>
+                            </button>
+                        </div>
+                        <textarea id="message-input" rows="1" placeholder="Ask anything about your skin..."
+                            class="w-full bg-transparent border-0 focus:ring-0 text-white placeholder-zinc-500 resize-none py-2.5 pr-2 text-sm md:text-base focus:outline-none leading-relaxed"></textarea>
+                    </div>
 
-                <div class="flex shrink-0">
-                    <button type="submit"
-                        class="p-3 bg-pink-accent text-white rounded-xl hover:opacity-90 transition-all shadow-lg shadow-pink-500/20 disabled:opacity-50 disabled:cursor-not-allowed">
-                        <i data-lucide="send-horizontal" class="w-5 h-5"></i>
-                    </button>
-                </div>
-            </form>
+                    <div class="flex shrink-0">
+                        <button type="submit" id="submit-btn"
+                            class="p-2.5 bg-pink-accent text-white rounded-lg btn-hover disabled:opacity-50 disabled:cursor-not-allowed group relative transition-colors"
+                            aria-label="Send message">
+                            <i data-lucide="send-horizontal" class="w-4 h-4"></i>
+                            <div
+                                class="absolute -top-10 right-0 bg-zinc-900 text-white text-xs py-1.5 px-2.5 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-150 whitespace-nowrap pointer-events-none shadow-lg border border-white/10">
+                                Send Message
+                                <div
+                                    class="absolute -bottom-1 right-3 w-2 h-2 bg-zinc-900 rotate-45 border-r border-b border-white/10">
+                                </div>
+                            </div>
+                        </button>
+                    </div>
+                </form>
+            </div>
+            <p class="text-center text-xs text-zinc-500 mt-2.5 px-2 flex items-center justify-center gap-1.5">
+                <i data-lucide="info" class="w-3 h-3"></i>
+                <span>AI can make mistakes. For medical advice, consult a dermatologist.</span>
+            </p>
         </div>
-        <p class="text-center text-[10px] text-zinc-600 mt-3">
-            AI can make mistakes. For medical advice, consult a dermatologist.
-        </p>
     </div>
 </div>
 
 <script>
-    const chatForm = document.getElementById('chat-form');
-    const messageInput = document.getElementById('message-input');
-    const fileInput = document.getElementById('file-input');
-    const uploadBtn = document.getElementById('upload-btn');
-    const fileIndicator = document.getElementById('file-indicator');
-    const chatMessages = document.getElementById('chat-messages');
-    const submitBtn = chatForm.querySelector('button[type="submit"]');
+    document.addEventListener('DOMContentLoaded', () => {
+        // Get chatId from URL
+        const pathParts = window.location.pathname.split('/');
+        const chatId = pathParts[pathParts.length - 1] || null;
 
-    // Handle File Upload Button
-    uploadBtn.addEventListener('click', () => fileInput.click());
+        const chatForm = document.getElementById('chat-form');
+        const messageInput = document.getElementById('message-input');
+        let fileInput = document.getElementById('file-input');
+        const uploadBtn = document.getElementById('upload-btn');
+        const fileIndicator = document.getElementById('file-indicator');
+        const chatMessages = document.getElementById('chat-messages');
+        const submitBtn = document.getElementById('submit-btn');
+        const filePreview = document.getElementById('file-preview');
+        const fileName = document.getElementById('file-name');
+        const removeFileBtn = document.getElementById('remove-file');
 
-    fileInput.addEventListener('change', () => {
-        if (fileInput.files.length > 0) {
-            fileIndicator.classList.remove('hidden');
-            uploadBtn.classList.add('text-pink-accent');
-        } else {
+        // Auto-resize textarea
+        messageInput.addEventListener('input', function () {
+            this.style.height = '';
+            this.style.height = Math.min(this.scrollHeight, 150) + 'px';
+        });
+
+        // Validate file type on selection
+        fileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file && !file.type.startsWith('image/')) {
+                alert('Only image files are allowed. Please select an image file.');
+                clearFileInput();
+                return;
+            }
+            handleFileSelect();
+        });
+
+        // Auto-resize textarea on load
+        if (messageInput.scrollHeight > 0) {
+            messageInput.style.height = messageInput.scrollHeight + 'px';
+        }
+
+        // Load existing messages if chatId exists
+        if (chatId && typeof messages !== 'undefined' && messages && messages.length > 0) {
+            messages.forEach(msg => {
+                const file = msg.imageUrl ? { type: 'image', url: msg.imageUrl } : null;
+                appendMessage(msg.role, msg.content, file, false);
+            });
+        } else if (chatId) {
+            // Try to load messages from API
+            loadChatHistory(chatId);
+        }
+
+        // Handle image expansion via delegation
+        chatMessages.addEventListener('click', (e) => {
+            if (e.target.classList.contains('img-expandable')) {
+                e.target.classList.toggle('max-w-full');
+                e.target.classList.toggle('max-w-[250px]');
+                e.target.classList.toggle('md:max-w-sm');
+            }
+        });
+
+        // Handle File Upload Button
+        uploadBtn.addEventListener('click', () => fileInput.click());
+
+
+        // Handle file removal
+        removeFileBtn?.addEventListener('click', clearFileInput);
+
+        // Handle paste event for images
+        messageInput.addEventListener('paste', (e) => {
+            const items = (e.clipboardData || window.clipboardData).items;
+            for (let i = 0; i < items.length; i++) {
+                if (items[i].type.indexOf('image') !== -1) {
+                    const file = items[i].getAsFile();
+                    if (file) {
+                        // Clear any existing file
+                        clearFileInput();
+
+                        // Create a new FileList with the pasted file
+                        const dataTransfer = new DataTransfer();
+                        dataTransfer.items.add(file);
+                        fileInput.files = dataTransfer.files;
+
+                        // Update UI
+                        handleFileSelect();
+
+                        // Focus back on the input
+                        messageInput.focus();
+
+                        e.preventDefault();
+                        return;
+                    }
+                }
+            }
+        });
+
+        function handleFileSelect() {
+            if (fileInput.files.length > 0) {
+                const file = fileInput.files[0];
+                // Validate it's an image
+                if (!file.type.startsWith('image/')) {
+                    alert('Only image files are allowed. Please select an image file.');
+                    clearFileInput();
+                    return;
+                }
+                fileIndicator.classList.remove('hidden');
+                uploadBtn.classList.add('text-pink-accent');
+
+                // Show file preview
+                filePreview.classList.remove('hidden');
+                fileName.textContent = file.name;
+
+                // Auto-scroll to bottom when file is selected
+                setTimeout(() => {
+                    chatMessages.scrollTop = chatMessages.scrollHeight;
+                }, 100);
+            } else {
+                clearFileInput();
+            }
+        }
+
+        // Load chat history from API
+        async function loadChatHistory(chatId) {
+            try {
+                const response = await fetch(`/api/chat/${chatId}/messages`);
+                const data = await response.json();
+                if (data.success && data.messages && data.messages.length > 0) {
+                    // Clear intro message
+                    const introMsg = chatMessages.querySelector('.max-w-3xl.mx-auto.text-center');
+                    if (introMsg) introMsg.remove();
+
+                    data.messages.forEach(msg => {
+                        const file = msg.imageUrl ? { type: 'image', url: msg.imageUrl } : null;
+                        appendMessage(msg.role, msg.content, file, false);
+                    });
+                }
+            } catch (error) {
+                console.error('Error loading chat history:', error);
+            }
+        }
+
+        function clearFileInput() {
+            fileInput.value = '';
             fileIndicator.classList.add('hidden');
             uploadBtn.classList.remove('text-pink-accent');
+            filePreview.classList.add('hidden');
         }
-    });
 
-    // Handle Form Submit
-    chatForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
+        // Handle Form Submit
+        chatForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            console.log('Form submitted');
 
-        const text = messageInput.value.trim();
-        const file = fileInput.files[0];
+            const text = messageInput.value.trim();
+            const file = fileInput.files[0];
 
-        if (!text && !file) return;
+            if (!text && !file) {
+                console.log('No text or file provided');
+                messageInput.classList.add('animate-shake');
+                setTimeout(() => messageInput.classList.remove('animate-shake'), 500);
+                return;
+            }
 
-        // Reset Input UI
-        messageInput.value = '';
-        messageInput.style.height = 'auto';
-        fileInput.value = '';
-        fileIndicator.classList.add('hidden');
-        uploadBtn.classList.remove('text-pink-accent');
-        submitBtn.disabled = true;
+            try {
+                // Show user message immediately
+                appendMessage('user', text, file);
 
-        // Append User Message
-        appendMessage('user', text, file);
+                // Clear input but keep the file if it exists
+                messageInput.value = '';
+                messageInput.style.height = 'auto';
+                submitBtn.disabled = true;
 
-        // Append Loading Indicator
-        const loadingId = appendLoading();
+                // Show loading indicator with thinking updates
+                const thinkingId = appendThinking();
+                startThinkingCycler();
 
-        try {
-            const formData = new FormData();
-            formData.append('text', text);
+                // Create form data
+                const formData = new FormData();
+                if (text) formData.append('text', text);
+                if (file) {
+                    // Validate file type
+                    if (!file.type.startsWith('image/')) {
+                        removeThinking(thinkingId);
+                        alert('Only image files are allowed. Please select an image file.');
+                        clearFileInput();
+                        submitBtn.disabled = false;
+                        return;
+                    }
+                    formData.append('image', file);
+                    console.log('File attached to message', { fileName: file.name, fileSize: file.size });
+                }
+
+                if (!chatId) {
+                    removeThinking(thinkingId);
+                    alert('Chat ID is missing. Please refresh the page.');
+                    submitBtn.disabled = false;
+                    return;
+                }
+
+                console.log('Sending request to /api/chat/' + chatId);
+                const response = await fetch(`/api/chat/${chatId}`, {
+                    method: 'POST',
+                    body: formData,
+                });
+
+                console.log('Response status:', response.status);
+
+                if (response.status === 401) {
+                    // Not authenticated - redirect to login
+                    const data = await response.json();
+                    if (data.redirect) {
+                        window.location.href = data.redirect;
+                        return;
+                    }
+                }
+
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({}));
+                    throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                console.log('Received response data', { thinkingSteps: data.thinking?.length });
+
+                // Remove thinking indicator
+                removeThinking(thinkingId);
+                stopThinkingCycler();
+
+                // Show final thinking update from backend if available
+                if (data.thinking && data.thinking.length > 0) {
+                    updateThinking(data.thinking[data.thinking.length - 1]);
+                }
+
+                if (data && data.result) {
+                    appendMessage('ai', data.result);
+                } else {
+                    console.error('Unexpected response format:', data);
+                    appendMessage('ai', 'Received an unexpected response format from the server.');
+                }
+
+            } catch (error) {
+                console.error('Error in form submission', { error: error.message, stack: error.stack });
+                stopThinkingCycler();
+                const thinkingEl = document.getElementById('thinking-indicator');
+                if (thinkingEl) removeThinking('thinking-indicator');
+
+                let errorMessage = 'Error: ';
+                if (error.message.includes('Failed to fetch')) {
+                    errorMessage += 'Could not connect to the server. Please check your internet connection.';
+                } else if (error.message.includes('NetworkError')) {
+                    errorMessage += 'Network error. Please try again later.';
+                } else if (error.message.includes('Only image files')) {
+                    errorMessage = error.message;
+                    alert(errorMessage);
+                } else {
+                    errorMessage += error.message || 'An unknown error occurred.';
+                }
+
+                if (!error.message.includes('Only image files')) {
+                    appendMessage('ai', errorMessage);
+                }
+            } finally {
+                // Clear file input and reset UI
+                fileInput.value = '';
+                filePreview.classList.add('hidden');
+                fileIndicator.classList.add('hidden');
+                uploadBtn.classList.remove('text-pink-accent');
+                submitBtn.disabled = false;
+
+                // Scroll to bottom of chat
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            }
+        });
+        function appendMessage(role, text, file = null, scroll = true) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `max-w-3xl mx-auto flex gap-4 px-2 md:px-0 message-enter ${role === 'user' ? 'flex-row-reverse user' : ''}`;
+
+            const timestamp = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            let contentHtml = '';
+
             if (file) {
-                formData.append('image', file);
+                // Handle both File objects and URL strings
+                const isFileObject = file instanceof File || (file.type && file.name);
+                const imageUrl = isFileObject ? URL.createObjectURL(file) : (file.url || file);
+
+                if (isFileObject ? file.type.startsWith('image/') : true) {
+                    contentHtml += `
+                        <div class="relative group mb-2">
+                            <div class="relative overflow-hidden rounded-lg border border-white/8 hover:border-white/15 transition-colors">
+                                <img src="${imageUrl}" class="max-w-[250px] md:max-w-sm rounded-lg cursor-pointer img-expandable" 
+                                     alt="Uploaded content">
+                                <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-end justify-center pb-2 rounded-lg transition-opacity">
+                                    <span class="text-white text-xs bg-black/80 px-2.5 py-1 rounded-md">Click to expand</span>
+                                </div>
+                            </div>
+                        </div>`;
+                }
             }
 
-            const response = await fetch('/api/chat', {
-                method: 'POST',
-                body: formData
-            });
-
-            const data = await response.json();
-
-            // Remove Loading
-            removeLoading(loadingId);
-
-            if (data.success) {
-                appendMessage('ai', data.result);
-            } else {
-                appendMessage('ai', 'Sorry, something went wrong. Please try again.');
+            if (text) {
+                try {
+                    const htmlContent = marked.parse(text);
+                    contentHtml += `
+                        <div class="prose prose-invert prose-sm max-w-none prose-p:leading-relaxed prose-headings:font-display prose-headings:font-semibold prose-strong:text-pink-accent/80 prose-li:text-zinc-300 pointer-events-auto select-text">
+                            ${htmlContent}
+                        </div>`;
+                } catch (e) {
+                    console.error('Error parsing markdown:', e);
+                    contentHtml += `<div class="whitespace-pre-wrap break-words">${text}</div>`;
+                }
             }
 
-        } catch (error) {
-            removeLoading(loadingId);
-            appendMessage('ai', 'Error connecting to the server.');
-            console.error(error);
-        } finally {
-            submitBtn.disabled = false;
-        }
-    });
-
-    function appendMessage(role, text, file = null) {
-        const div = document.createElement('div');
-        div.className = `max-w-3xl mx-auto flex gap-4 animate-slide-up ${role === 'user' ? 'flex-row-reverse' : ''}`;
-
-        let contentHtml = '';
-
-        if (file) {
-            const url = URL.createObjectURL(file);
-            contentHtml += `<img src="${url}" class="max-w-[200px] rounded-xl mb-2 border border-white/10">`;
-        }
-
-        if (text) {
-            const htmlContent = marked.parse(text);
-            contentHtml += `<div class="prose prose-invert prose-sm max-w-none prose-p:leading-relaxed prose-headings:font-display prose-headings:font-bold prose-strong:text-pink-accent prose-li:text-zinc-300 pointer-events-auto select-text">${htmlContent}</div>`;
-        }
-
-        div.innerHTML = `
-            <div class="w-8 h-8 rounded-lg ${role === 'user' ? 'bg-zinc-800' : 'bg-pink-accent'} flex items-center justify-center shrink-0 mt-1">
-                 <i data-lucide="${role === 'user' ? 'user' : 'bot'}" class="${role === 'user' ? 'text-zinc-400' : 'text-white'} w-5 h-5"></i>
-            </div>
-            <div class="glass px-6 py-4 rounded-2xl ${role === 'user' ? 'rounded-tr-none border-pink-accent/20 bg-pink-accent/5 text-white' : 'rounded-tl-none border-white/10 text-zinc-200'} leading-relaxed">
-                ${contentHtml || '<p>Sent an image.</p>'}
-            </div>
-        `;
-
-        chatMessages.appendChild(div);
-        chatMessages.scrollTop = chatMessages.scrollHeight;
-        lucide.createIcons();
-    }
-
-    function appendLoading() {
-        const id = 'loading-' + Date.now();
-        const div = document.createElement('div');
-        div.id = id;
-        div.className = "max-w-3xl mx-auto flex gap-4 animate-slide-up";
-        div.innerHTML = `
-             <div class="w-8 h-8 rounded-lg bg-pink-accent flex items-center justify-center shrink-0 mt-1">
-                 <i data-lucide="bot" class="text-white w-5 h-5"></i>
-            </div>
-            <div class="space-y-2">
-                <div class="glass px-6 py-4 rounded-2xl rounded-tl-none border border-white/10">
-                     <div class="flex gap-1.5 h-full items-center">
-                        <span class="w-1.5 h-1.5 bg-zinc-500 rounded-full animate-bounce"></span>
-                        <span class="w-1.5 h-1.5 bg-zinc-500 rounded-full animate-bounce" style="animation-delay: 0.1s"></span>
-                        <span class="w-1.5 h-1.5 bg-zinc-500 rounded-full animate-bounce" style="animation-delay: 0.2s"></span>
-                    </div>
+            messageDiv.innerHTML = `
+                <div class="flex-shrink-0 w-8 h-8 rounded-lg ${role === 'user' ? 'bg-zinc-700 border border-zinc-600' : 'bg-pink-accent/12 border border-pink-accent/20'} flex items-center justify-center">
+                    <i data-lucide="${role === 'user' ? 'user' : 'bot'}" class="w-4 h-4 ${role === 'user' ? 'text-zinc-300' : 'text-pink-accent'}"></i>
                 </div>
-            </div>
-        `;
-        chatMessages.appendChild(div);
-        chatMessages.scrollTop = chatMessages.scrollHeight;
-        lucide.createIcons();
-        return id;
-    }
+                <div class="message-content flex-1 ${role === 'user' ? 'items-end' : ''}">
+                    <div class="glass px-4 py-3 rounded-lg ${role === 'user' ? 'rounded-tr-none bg-zinc-800/50 border-zinc-700/50' : 'rounded-tl-none border-white/8'} border text-zinc-300 leading-relaxed message-bubble">
+                        ${contentHtml || '<div class="text-sm text-zinc-400">Sent a file</div>'}
+                    </div>
+                    <div class="text-xs text-zinc-500 mt-1.5 ml-1 flex items-center gap-1 ${role === 'user' ? 'justify-end' : ''}">
+                        <span>${timestamp}</span>
+                        ${role === 'user' ? '<i data-lucide="check" class="w-3 h-3 text-blue-500"></i>' : ''}
+                    </div>
+                </div>`;
 
-    function removeLoading(id) {
-        const el = document.getElementById(id);
-        if (el) el.remove();
-    }
+            chatMessages.appendChild(messageDiv);
+            if (scroll) {
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            }
+            lucide.createIcons();
+
+            // Add smooth scrolling to the new message
+            if (scroll) {
+                setTimeout(() => {
+                    messageDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                }, 10);
+            }
+        }
+
+        // Append thinking indicator
+        function appendThinking() {
+            const id = 'thinking-indicator';
+            // Remove existing thinking indicator if any
+            const existing = document.getElementById(id);
+            if (existing) existing.remove();
+
+            const div = document.createElement('div');
+            div.id = id;
+            div.className = "max-w-3xl mx-auto flex gap-3 px-2 md:px-0 message-enter mb-2";
+            div.innerHTML = `
+                <div class="w-8 h-8 rounded-lg bg-pink-accent/12 border border-pink-accent/20 flex items-center justify-center flex-shrink-0">
+                    <i data-lucide="brain" class="text-pink-accent w-4 h-4"></i>
+                </div>
+                <div class="message-content flex-1">
+                    <div class="glass px-4 py-2.5 rounded-lg rounded-tl-none border border-white/8 message-bubble">
+                        <div class="flex items-center gap-2 text-xs text-zinc-400">
+                            <i data-lucide="loader-2" class="w-3 h-3 animate-spin"></i>
+                            <span id="thinking-text">Thinking...</span>
+                        </div>
+                    </div>
+                </div>`;
+
+            chatMessages.appendChild(div);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+            lucide.createIcons();
+            return id;
+        }
+
+        function removeThinking(id) {
+            const el = document.getElementById(id);
+            if (el) {
+                el.classList.add('opacity-0', 'transition-opacity', 'duration-300');
+                setTimeout(() => el.remove(), 300);
+            }
+        }
+
+        // Update thinking text
+        let thinkingTimeout = null;
+        function updateThinking(text) {
+            const thinkingText = document.getElementById('thinking-text');
+            if (thinkingText) {
+                // Subtle fade transition for text changes
+                thinkingText.style.transition = 'opacity 0.2s ease-in-out';
+                thinkingText.style.opacity = '0';
+                setTimeout(() => {
+                    thinkingText.textContent = text;
+                    thinkingText.style.opacity = '1';
+                }, 200);
+            }
+        }
+
+        const clinicalSentences = [
+            "Analyzing dermal patterns...",
+            "Consulting clinical dermatology database...",
+            "Scanning for skin condition matches...",
+            "Evaluating active ingredient compatibility...",
+            "Cross-referencing symptom clusters...",
+            "Processing epidermal texture markers...",
+            "Searching for evidence-based treatments...",
+            "Synthesizing personalized skincare routine...",
+            "Checking product safety profiles...",
+            "Calculating skin-type specific solutions..."
+        ];
+
+        function startThinkingCycler() {
+            const cycle = () => {
+                // Variable delays for more realism (2.5s to 5s)
+                const delay = Math.floor(Math.random() * 2500) + 2500;
+                thinkingTimeout = setTimeout(() => {
+                    const nextText = clinicalSentences[Math.floor(Math.random() * clinicalSentences.length)];
+                    updateThinking(nextText);
+                    cycle();
+                }, delay);
+            };
+
+            updateThinking("Initializing clinical analysis...");
+            cycle();
+        }
+
+        function stopThinkingCycler() {
+            if (thinkingTimeout) {
+                clearTimeout(thinkingTimeout);
+                thinkingTimeout = null;
+            }
+        }
+
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        // Auto-focus the input on load
+        messageInput.focus();
+    });
 </script>
